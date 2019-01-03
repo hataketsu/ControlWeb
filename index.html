@@ -42,8 +42,31 @@
 
 <br>
 <br>
-<div class="ui container">
-
+<div class="ui container" id="login_panel">
+    <div class="ui grid">
+        <div class="four wide column"></div>
+        <div class="eight wide column">
+            <div class="ui form">
+                <div class="field">
+                    <label>Tài khoản</label>
+                    <input type="text" name="username" id="usernameED" placeholder="Tài khoản">
+                </div>
+                <div class="field">
+                    <label>Mật khẩu</label>
+                    <input type="password" name="password" id="passwordED" placeholder="Mật khẩu">
+                </div>
+                <button class="ui blue button" onclick="login()">Đăng nhập</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="ui container" id="control_panel" style="display:none">
+    <div class="row">
+        <div class="column" style="text-align: center">
+            <button class="ui red button" onclick="logout()">Đăng xuất</button>
+        </div>
+    </div>
+    <br>
     <div class="ui four column grid">
         <div class="column">
             <div class="ui card" style="padding: 20px">
@@ -175,6 +198,15 @@
 <br>
 </body>
 <script>
+    $(() => {
+        if (document.cookie === 'loggedin') {
+            $('#login_panel').hide();
+            $('#control_panel').show();
+        } else {
+            $('#login_panel').show();
+            $('#control_panel').hide();
+        }
+    });
     $('select').dropdown({
         on: 'hover'
     });
@@ -187,7 +219,7 @@
 
     client.on('connect', function () {
         console.log('connected');
-        client.subscribe(username + '/f/#');
+        client.subscribe(username + '/f/data');
     });
     $(".turnbtn").on('click', (e) => {
         console.log(e);
@@ -202,15 +234,29 @@
 
     client.on('message', function (topic, payload) {
         console.log('' + topic, '' + payload);
-        if (topic.endsWith('/humi')) {
-            $('#humiTV').html('' + payload);
-        } else if (topic.endsWith('/temp')) {
-            $('#tempTV').html('' + payload);
-        } else if (topic.endsWith('/chay')) {
-            $('#flameTV').html('' + payload);
-        } else if (topic.endsWith('/trom')) {
-            $('#robTV').html('' + payload);
-        }
+        data = ('' + payload).split(';');
+        $('#humiTV').html('' + data[0]);
+        $('#tempTV').html('' + data[1]);
+        $('#flameTV').html('' + data[2]);
+        $('#robTV').html('' + data[3]);
     });
+
+    function login() {
+        username = $("#usernameED").val().trim();
+        password = $("#passwordED").val().trim();
+        if (username == 'admin' && password == 'bimat') {
+            alert('Đăng nhập thành công!');
+            document.cookie = 'loggedin';
+            location.reload();
+        } else {
+            alert('Sai tài khoản hoặc mật khẩu!!');
+        }
+    }
+
+    function logout() {
+        alert('Đăng xuất thành công!');
+        document.cookie = '';
+        location.reload();
+    }
 </script>
 </html>
